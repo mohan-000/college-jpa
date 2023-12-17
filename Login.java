@@ -1,58 +1,62 @@
-package com.ps.validation;
+package com.pentagon;
 
-import java.sql.*;
-import java.util.*;
-public class Login {
-public static void main(String[] args) throws SQLException {
-	Connection con=null;
-	ResultSet rs=null;
-	PreparedStatement ft=null;
-	String query="SELECT * FROM STUDENT WHERE NAME=? AND PASSWORD=?";
-	try {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		 con=DriverManager.getConnection("jdbc:mysql://localhost:3306/COLLEGE?"+"user=root&password=simmy");
-		 ft= con.prepareStatement(query);
-		 System.out.println("login portal");
-		 System.out.println("enter the student id");
-Scanner scan=new Scanner(System.in);
-String id=scan.next();
-ft.setString(1,id);
-System.out.println("enter the password");
-String password=scan.next();
-ft.setString(2, password);
- rs=ft.executeQuery();
-if(rs.next()) {
-	String name=rs.getString(1);
-	long phonenumber=rs.getLong(2);
-	String emailid=rs.getString(3);
-	String location=rs.getString(4);
-	String branch=rs.getString(5);
-	System.out.println("welcome"+name+",");
-	System.out.println("your phone number"+phonenumber+',');
-    System.out.println("your emaidid"+emailid+',');
-    System.out.println("your location"+location+',');
-    System.out.println("your branch"+branch+',');
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-}
-else {
-	System.out.println("incorrect id password");
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+@WebServlet("/re")
+public class Login extends HttpServlet 
+{
+@Override
+public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException 
+{
+	String sid=req.getParameter("s");
+	String pass=req.getParameter("p");
 	
-}
-	} catch (ClassNotFoundException e) {
+	Connection con=null;
+	PreparedStatement pre=null;
+	ResultSet re=null;
+	
+	String query="SELECT * FROM STUDENT WHERE SID=? AND PASSWORD=?";
+	
+	PrintWriter out= resp.getWriter();
+	 try 
+	 {
+		con=Connector.requestConnection();
+		pre=con.prepareStatement(query);
+		
+		int p1=Integer.parseInt(sid);
+		pre.setInt(1, p1);
+		pre.setString(2,pass);
+		
+		re=pre.executeQuery();
+		if (re.next()) 
+		{
+			
+			String name=re.getString(2);
+			out.println("<html>"+"<body>"+"<h3>welcome"+" "+name+",</h3>"+"</body>"+"</html>");
+		}
+		else
+		{
+			RequestDispatcher f=req.getRequestDispatcher("invalid.html");
+			f.include(req, resp);
+		}
+		
+		
+	} 
+	 catch (Exception e) 
+	 {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
-	finally {
-		try {
-			if(rs!=null)rs.close();
-			if(ft!=null)ft.close();
-			if(con!=null)con.close();
-
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-
-		}
-	}
+	} 
 }
 }
